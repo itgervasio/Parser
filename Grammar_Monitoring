@@ -1,0 +1,12 @@
+start := SLAMonitoring
+SLAMonitoring := 'SLA ID', ts?, ':', ts?, ID, ts?, '{', ts?, Metric+, ts?, '}'
+ID := Word / Numbers 
+Metric := ts?, Constraint, ts, ':', ts, Type, ts?, ';', ts?
+Constraint := Word
+Type := List_Elements / Boolean / Numbers
+List_Elements := '{', ListElement, (',', ts?, ListElement)*, '}'
+ListElement := Word
+Numbers := number
+Boolean := 'true' / 'false' / 'True' / 'False'
+Word := [a-zA-Z], [a-zA-Z0-9_]*
+ts := [ \t\n\r]*

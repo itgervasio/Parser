@@ -1,0 +1,47 @@
+#TODO FIX:
+#ADD not to metrics
+start := SLA
+SLA := ts, 'ID:', ts, ID, ts, 'parties:', ts, PartyDef, ts, PartyDef+, ts, 'term groups:'?, ts, Group*, ts, 'terms:', ts, Term+, ts?, 'guarantees:'?, ts?, Guarantee*
+ID := Word / Numbers 
+PartyDef := PartyName?, ts?, 'roles:', ts?, Roles
+PartyName := ID
+Roles := Role, (ts, ',', ts, Role)*
+Role := 'consumer' / 'provider' / 'carrier' / 'auditor' / 'broker'
+Group := GroupName, ts, Term+, ts
+GroupName := Word
+Term :=  Standard_Term / Group_Metric
+Standard_Term := ts?, Party, ts,  '->', ts,  Parties, ':', ts, Metric 
+Party := Word / Role
+Parties := Party, (ts, ',', ts, Party)*
+Metric := Numeric_Metric / Boolean_Metric / List_Metric
+Numeric_Metric := NM, ts, 'in', ts, Interval, ts, Unit
+Boolean_Metric := BM, ts, 'is', ts, Boolean
+List_Metric := LM, ts, 'has', ts?, List_Elements, (ts?, 'or', ts?, List_Elements, ts? )*
+List_Elements := '{', ListElement, (',', ts?, ListElement)*, '}'
+ListElement := 'OCCI' / 'EC2' / 'UCI'
+Group_Metric := ts?, '[', Expr, ',', ts?,  Expr, ']', ts, 'of', ts, GroupName, ts?
+BM := 'replication' / 'backup'
+LM := 'interface'
+Boolean := 'true' / 'false'
+NM := 'availability' / 'response_time' / 'ram' / 'jitter' / 'cCpu' / 'storage' / 'RT_delay' / 'cost'
+Unit := 'gb' / '#' / 'ms' / 'hour'
+SpecialMetrics := 'any'
+Interval := IntervalType, Expr, ',', ts?,  Expr,  IntervalType
+IntervalType := '[' / ']'
+Expr := Numbers / '-'
+BooleanExpr :=  (ExprGuaranteeMetric / Expr), ts, BooleanOperator, ts, (ExprGuaranteeMetric / Expr)
+ExprGuaranteeMetric := GuaranteeMetricPrefix, GuaranteeMetric 
+BooleanOperator :=  '==' / '>=' / '<=' / '>' / '<' / '!='
+Guarantee := 'on', ts?, Event, ts?, 'of', ts?,  GuaranteeMetricPrefix, ts?, GuaranteeMetric, ts?, ':', ConditionAction
+GuaranteeMetricPrefix := ts?, (Party, ts, '=>', ts, Parties, ':')?, ts?, GroupSpecification?, ts? 
+GuaranteeMetric := NM / LM / BM / GroupName / SpecialMetrics
+Event := 'violation'
+ConditionAction := If+, Else
+If := ts?, 'if', ts, BooleanExpr, ts, 'then', ts,  Action+, ts?
+Else := (ts?, 'else', ts, Action+)?
+GroupSpecification := GroupName, (':', GroupName)*, ':'
+Action := ts?, (Party, ts,  '=>', ts,  Parties)?, ts, ManagementAction
+ManagementAction := 'notify' / 'renegotiate'
+Numbers := number
+Word := [a-zA-Z], [a-zA-Z0-9_]*
+ts := [ \t\n\r]*
